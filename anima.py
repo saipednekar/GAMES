@@ -1,6 +1,7 @@
 from cmath import rect
 from tkinter import constants
 import pygame
+from pygame import mixer
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -15,11 +16,21 @@ font_score=pygame.font.Font("fonts/font.TTF",50)
 background= pygame.image.load('im/b.jpg')
 background= pygame.transform.scale(background, (800,600))
 
-
-b_v=0.5
+backi_width=800
+b_v=0
 b_x=0
 
-def menu(b_v, b_x):
+
+volume=2
+mixer.music.load("music/Arcade.mp3")
+mixer.music.set_volume(volume)
+mixer.music.play(-1)
+
+
+
+
+
+def menu(b_v, b_x ,backi_widt):
     menu=False
 
     while not menu:
@@ -34,7 +45,7 @@ def menu(b_v, b_x):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    gameloop(b_v,b_x)  
+                    gameloop(b_v,b_x,backi_width)  
                     
 
                 
@@ -42,9 +53,9 @@ def menu(b_v, b_x):
         pygame.display.update() 
 
 
-def gameover(s,score,rect_color,b_v,b_x):
+def gameover(s,score,rect_color,b_v,b_x,backi_width,gameo):
     menu=False
-
+    gameo.play()
     while not menu:
         screen.fill((255, 255, 255))
         screen.blit(background,(0,0))
@@ -61,7 +72,7 @@ def gameover(s,score,rect_color,b_v,b_x):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    gameloop(b_v,b_x)  
+                    gameloop(b_v,b_x,backi_width)  
                     
 
                 
@@ -70,7 +81,7 @@ def gameover(s,score,rect_color,b_v,b_x):
 
     pygame.quit()
 
-def gameloop(b_v,b_x):
+def gameloop(b_v,b_x,backi_width):
     
     with open('hi.txt') as f:
         s = f.read()
@@ -138,9 +149,12 @@ def gameloop(b_v,b_x):
         scorefon=font_score.render("Score  " +str(sc) +""+" highscore "+str(s),True,(255,10,10))
         screen.blit(scorefon,(10,10))
 
+    reward = pygame.mixer.Sound('music/reward.wav')
+    gameo = pygame.mixer.Sound('music/gameover.wav')
+    scoo = pygame.mixer.Sound('music/score.wav')
 
-    bmx=800-b_x
-
+    pygame.mixer.music.set_volume(volume-0.3)
+   
     while  running:
             # # print(rx3)
             # if int(rx3) == 300:
@@ -148,13 +162,17 @@ def gameloop(b_v,b_x):
             space =True
             # print(velo) 
             screen.fill((255, 255, 255))
-            screen.blit(background,(b_x,0))
-            b_x-=b_v
-            if b_x<0:
-                screen.blit(background,(bmx,0))
-                bmx-=b_v
-                # print(bmx)
-           
+            screen.blit(background,(b_v,0))
+            screen.blit(background,(backi_width+b_v,0))
+            b_v-=1
+            
+            if (backi_width+b_v)<0:
+                backi_width=800
+                b_v=0
+                # print("t")
+                        
+
+
 
             sco(score)
 
@@ -194,9 +212,14 @@ def gameloop(b_v,b_x):
                         if event.key == pygame.K_LEFT:
                             velo+=-5
                         if event.key == pygame.K_SPACE: 
+                        
+                                reward.play()
+
                                 screen.blit(l[i<=len(l)], (x,y ))
                                 y+=-200
-                                space=False     
+                                space=False  
+                                
+
                     if event.type == pygame.KEYUP: 
                             if event.key == pygame.K_RIGHT:
                                 velo = 0  
@@ -204,7 +227,8 @@ def gameloop(b_v,b_x):
                             if event.key == pygame.K_LEFT:
                                 velo = 0
                         
-                            if event.key == pygame.K_SPACE: 
+                            if event.key == pygame.K_SPACE:
+                              
                                 screen.blit(l[i<=len(l)], (x,400))
                                 y=383
                                 space=False   
@@ -266,21 +290,27 @@ def gameloop(b_v,b_x):
                 print(f"c{cn}")
                 cn+=1   
                 collision=True
-            print(rectv)    
+            # print(rectv)    
             if score >=30 and score<=100:
                 rectv =6
             elif score >100 and score <=250:
+
                 rectv = 7   
             elif score >250 and score <=500:
+
                 rectv = 8
             elif score >590 and score <=1100:
+         
                 rectv = 10
             elif score >1100 and score <=2500:
+
                 rectv = 12
             elif score >2500 :
+
                 rectv = 13
             
-
+            if score ==30 or score ==100 or score ==250 or score ==500 or score ==900 or score==1800 or score==2400:
+                scoo.play()
 
             if collision:
                 if score > int(s):
@@ -288,11 +318,11 @@ def gameloop(b_v,b_x):
                         f.write(str(score))
                 # restart= True
                 b_x=0
-                gameover(s,score,rect_color,b_v,b_x)
+                gameover(s,score,rect_color,b_v,b_x,backi_width,gameo)
 
             # # pygame.draw.rect(screen, (111,223,113), [0, 467, 900, 900])
             pygame.display.update()
             clock.tick(50)
-menu(b_v,b_x)
+menu(b_v,b_x,backi_width)
 gameover()
 pygame.quit()
