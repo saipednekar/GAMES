@@ -1,0 +1,10 @@
+certifi==2022.5.18.1
+cx-Freeze==6.11.0
+dnspython==2.2.1
+numpy==1.23.0
+packaging==21.3
+patchelf==0.14.5.0
+pygame==2.1.2
+pygame-functions==0.0.1
+pymongo==4.1.1
+pyparsing==3.0.9
