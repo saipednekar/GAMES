@@ -4,12 +4,45 @@ from distutils.fancy_getopt import FancyGetopt
 from tkinter import constants
 import pygame
 from pygame import mixer
+import numpy as np
+
+
+from pygame_functions import*
 
 pygame.init()
 clock = pygame.time.Clock()
-
+import pymongo
+l="mongodb+srv://sai:1891997s@cluster0.a8d1j.mongodb.net/?retryWrites=true&w=majority"
+myclient = pymongo.MongoClient(l)
+mydb = myclient["game"]
+mycol = mydb["scores"]
+players_name=[]
+database_score=[]
+database_players=[]
+all=[]
+for x in mycol.find():
+    # print(x["name"],x["score"])
+    all.append([x["name"],x["score"]])
+# mydict = { "name": "st", "score": "37" }
+    f=x["name"]
+    f2=x["score"]
+    database_players.append(f)
+    database_score.append(int(f2))
+# x = mycol.insert_one(mydict)
+# print(all)
 
 import random
+# print(database_score)
+# print(database_players)
+
+n=np.argmax(database_score)
+# print(n)
+highscorer_name=database_players[n]
+highscorer_score=database_score[n]
+# print(highscorer_score)
+
+
+
 screen = pygame.display.set_mode([800, 600])
 pygame.display.set_caption("SAH-SID-RUN!")
 
@@ -28,6 +61,42 @@ mixer.music.load("music/Arcade.mp3")
 mixer.music.set_volume(volume)
 mixer.music.play(-1)
 
+def player():
+    if player:
+        screenSize(800,600)
+        screen.fill((255, 255, 255))
+        screen.blit(background,(0,0))
+        pygame.display.set_caption("Runner")
+
+        
+        instructionLabel = makeLabel("Please enter Player's name >length 5 and press Enter to continue!!!", 33, 5, 5, "blue", "Agency FB", "yellow")
+        showLabel(instructionLabel)
+        
+        
+        instructionLabel2 = makeLabel("Please Esc if you  had typed incorrect lengh name,  to Exit!!!", 33, 5,300, "blue", "Agency FB", "yellow")
+        showLabel(instructionLabel2)
+
+
+        wordBox = makeTextBox(200, 200, 300, 0, "Enter text here", 15, 24)
+        showTextBox(wordBox)
+        entry = textBoxInput(wordBox)
+        players_name.append(entry)
+        print(players_name)
+
+
+        wordlabel = makeLabel(entry, 30, random.randint(1,600), random.randint(50,600), "red")
+        showLabel(wordlabel)
+        
+        # hideLabel(wordlabel)
+        if len(entry) > 5:
+            menu(b_v,b_x,backi_width)
+            
+
+        endWait()
+
+    
+
+
 
 
 
@@ -38,7 +107,7 @@ def menu(b_v, b_x ,backi_width):
     character2=True
     i=0
 
-  
+    
     a1= pygame.image.load('im/1.png')
     a2= pygame.image.load('im/2.png')
     a3= pygame.image.load('im/3.png')
@@ -75,11 +144,14 @@ def menu(b_v, b_x ,backi_width):
     while not menu:
         screen.fill((255, 255, 255))
         screen.blit(background,(0,0))
+
+
         mt=font_score.render("PRESS Space to Enter the Game",True,(255,60,60))
         screen.blit(mt,(70,100))
         mt2=font_score.render("chosse characters using arowkeys",True,(255,60,60))
         screen.blit(mt2,(1,200))
         
+ 
 
         li1=[a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11,a12, a13, a14]
 
@@ -153,7 +225,7 @@ def menu(b_v, b_x ,backi_width):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 menu = True
-
+            
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     character1=True
@@ -178,20 +250,38 @@ def menu(b_v, b_x ,backi_width):
                 pygame.draw.rect(screen, c, [580, 300, 30, 30])
 
         pygame.display.update() 
+
+       
         clock.tick(60)
 
 
-def gameover(s,score,rect_color,b_v,b_x,backi_width,gameo,character1,character2):
+def gameover(score,rect_color,b_v,b_x,backi_width,gameo,character1,character2):
     menu=False
     gameo.play()
+    cl=0
     while not menu:
         screen.fill((255, 255, 255))
         screen.blit(background,(0,0))
         mt=font_score.render(f"GAME OVER! YourScore{score}",True,(rect_color))
-        mt2=font_score.render("HiGHSCORE "+str(s),True,(rect_color))
+        mt2=font_score.render(str(highscorer_name)+" ==> "+" HiGHSCORE "+str(highscorer_score),True,(0,0,0))
+        # for i in all:
+        #     mts=font_score.render(str(i),True,(rect_color))
+        #     screen.blit(mts,(200,400))
+            
 
+        if cl<len(all):
+            mts=font_score.render(str(all[cl]),True,(rect_color))
+
+            cl+=1
+            if cl==len(all):
+                cl=0
+        
         screen.blit(mt,(100,240))
-        screen.blit(mt2,(200,100))
+        screen.blit(mt2,(0,100))
+        
+        screen.blit(mts,(100,400))
+            
+
 
 
         for event in pygame.event.get():
@@ -206,13 +296,14 @@ def gameover(s,score,rect_color,b_v,b_x,backi_width,gameo,character1,character2)
                 
 
         pygame.display.update() 
+        clock.tick(1)
 
     pygame.quit()
 
 def gameloop(b_v,b_x,backi_width,character1,character2):
     
-    with open('hi.txt') as f:
-        s = f.read()
+    # with open('hi.txt') as f:
+    #     s = f.read()
 
     if character1:
         a1= pygame.image.load('im/1.png')
@@ -287,7 +378,7 @@ def gameloop(b_v,b_x,backi_width,character1,character2):
         
 
     def sco(sc):
-        scorefon=font_score.render("Score  " +str(sc) +""+" highscore "+str(s),True,(255,10,10))
+        scorefon=font_score.render("Score  " +str(score) +""+" highscore "+str(highscorer_score),True,(255,10,10))
         screen.blit(scorefon,(10,10))
 
     reward = pygame.mixer.Sound('music/reward.wav')
@@ -454,16 +545,23 @@ def gameloop(b_v,b_x,backi_width,character1,character2):
                 scoo.play()
 
             if collision:
-                if score > int(s):
-                    with open("hi.txt","w") as f:
-                        f.write(str(score))
-                # restart= True
+                if score > int(highscorer_score):
+                    dict={
+                        "name":players_name[0],
+                        "score":score,
+                    }
+                    mycol.insert_one(dict)
+
+                #     with open("hi.txt","w") as f:
+                #         f.write(str(score))
+                # # restart= True
                 b_x=0
-                gameover(s,score,rect_color,b_v,b_x,backi_width,gameo,character1,character2)
+                gameover(score,rect_color,b_v,b_x,backi_width,gameo,character1,character2)
 
             # # pygame.draw.rect(screen, (111,223,113), [0, 467, 900, 900])
             pygame.display.update()
             clock.tick(60)
-menu(b_v,b_x,backi_width)
-gameover()
+
+player()
+
 pygame.quit()
