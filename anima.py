@@ -12,7 +12,7 @@ from pygame_functions import*
 pygame.init()
 clock = pygame.time.Clock()
 import pymongo
-l="mongodb+srv://sai:1891997s@cluster0.a8d1j.mongodb.net/?retryWrites=true&w=majority"
+l=#your mongo db database  url
 myclient = pymongo.MongoClient(l)
 mydb = myclient["game"]
 mycol = mydb["scores"]
